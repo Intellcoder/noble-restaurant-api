@@ -1,0 +1,51 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getReservationById = exports.getAllReservations = exports.createReservation = void 0;
+const reservation_services_1 = require("../services/reservation.services");
+const createReservation = async (req, res, next) => {
+    try {
+        const data = req.body;
+        const result = await reservation_services_1.ReservationService.createReservation(data);
+        return res.status(200).json({
+            success: true,
+            message: result.message,
+            data: result.data,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+exports.createReservation = createReservation;
+const getAllReservations = async (req, res, next) => {
+    try {
+        const { totalReservations, data } = await reservation_services_1.ReservationService.getAllReservations();
+        return res.status(200).json({
+            success: true,
+            totalReservations,
+            data,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+exports.getAllReservations = getAllReservations;
+const getReservationById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await reservation_services_1.ReservationService.getReservationById(id);
+        return res.status(200).json({
+            success: true,
+            result,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+exports.getReservationById = getReservationById;
+//# sourceMappingURL=reservation.controllers.js.map
