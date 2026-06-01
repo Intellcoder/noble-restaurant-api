@@ -18,7 +18,10 @@ const app: Application = express();
 app.use("/webhook", webhookRouter);
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "https://noble-restaurant-api.onrender.com",
+      "https://noble-restaurant.ng",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
