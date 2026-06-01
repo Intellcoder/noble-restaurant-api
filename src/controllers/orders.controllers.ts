@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { OrderServices } from "../services/order.services";
-import { success } from "zod";
+import { customError } from "../errors/errorHandler";
 
 export const createOrder = async (
   req: Request,
@@ -19,7 +19,7 @@ export const createOrder = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 
@@ -42,7 +42,7 @@ export const getOrderById = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 
@@ -65,7 +65,7 @@ export const getOrderByNumber = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 
@@ -77,13 +77,14 @@ export const getAllOrders = async (
   try {
     const orders = await OrderServices.findAllOrders();
 
+    console.log("orders:", orders);
     return res.status(200).json({
       success: true,
       data: orders,
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 
@@ -94,20 +95,20 @@ export const verifyPayment = async (
 ) => {
   try {
     const { orderId } = req.params;
-    const { paymentReference } = req.body;
 
     if (!orderId || Array.isArray(orderId)) {
       throw new Error("Invalid order id");
     }
-    const result = await OrderServices.verifyPayment(orderId, paymentReference);
+    const result = await OrderServices.verifyPayment(orderId);
 
     return res.status(200).json({
       success: true,
       message: `Payment verified successfully`,
+      data: result,
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 
@@ -123,16 +124,20 @@ export const updateOrderStatus = async (
     if (!orderId || Array.isArray(orderId)) {
       throw new Error("Invalid order id");
     }
-    const result = await OrderServices.updateOrderStatus(orderId, status);
+
+    const { data, success, message } = await OrderServices.updateOrderStatus(
+      orderId,
+      status,
+    );
 
     return res.status(200).json({
-      success: true,
-      message: `Order status updated successfully`,
-      data: result.data,
+      success,
+      message,
+      data,
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };
 export const deleteOrder = async (
@@ -154,6 +159,6 @@ export const deleteOrder = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to create order", 500));
   }
 };

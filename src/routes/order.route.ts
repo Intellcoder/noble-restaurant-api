@@ -1,7 +1,4 @@
-// routes/order.routes.ts
-
 import { Router } from "express";
-
 import {
   createOrder,
   deleteOrder,
@@ -12,81 +9,29 @@ import {
   verifyPayment,
 } from "../controllers/orders.controllers";
 import { validate } from "../middlewares/validateRequest";
-import { orderItemSchema } from "../utils/validators/order.validaton";
+import {
+  createOrderSchema,
+  updateOrderStatusSchema,
+  verifyPaymentSchema,
+} from "../utils/validators/order.validaton";
 
 const router = Router();
 
-/**
- * ----------------------------------------
- * CREATE ORDER
- * ----------------------------------------
- */
-router.post("/", validate(orderItemSchema), createOrder);
-
-/**
- * ----------------------------------------
- * GET ALL ORDERS
- * ----------------------------------------
- */
+router.post("/", validate(createOrderSchema), createOrder); // ✅
+router.get("/", getAllOrders);
+router.get("/id/:id", getOrderById);
+router.get("/number/:orderNumber", getOrderByNumber);
 router.get(
-  "/",
-
-  getAllOrders,
-);
-
-/**
- * ----------------------------------------
- * GET ORDER BY ID
- * ----------------------------------------
- */
-router.get(
-  "/id/:id",
-
-  getOrderById,
-);
-
-/**
- * ----------------------------------------
- * GET ORDER BY ORDER NUMBER
- * ----------------------------------------
- */
-router.get(
-  "/number/:orderNumber",
-
-  getOrderByNumber,
-);
-
-/**
- * ----------------------------------------
- * VERIFY PAYMENT
- * ----------------------------------------
- */
-router.post(
   "/verify-payment/:orderId",
-
+  //   validate(verifyPaymentSchema),
   verifyPayment,
-);
+); // ✅ added schema
 
-/**
- * ----------------------------------------
- * UPDATE ORDER STATUS
- * ----------------------------------------
- */
 router.patch(
   "/status/:orderId",
-
+  validate(updateOrderStatusSchema),
   updateOrderStatus,
-);
-
-/**
- * ----------------------------------------
- * DELETE ORDER
- * ----------------------------------------
- */
-router.delete(
-  "/:orderId",
-
-  deleteOrder,
-);
+); // ✅ added schema
+router.delete("/:orderId", deleteOrder);
 
 export default router;

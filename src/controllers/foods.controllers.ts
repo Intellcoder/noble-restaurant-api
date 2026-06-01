@@ -75,6 +75,27 @@ export const updateFood = async (
 ) => {
   try {
     const { id } = req.params;
+    const data = req.body;
+
+    const result = await FoodService.update(id as string, data);
+
+    return res.status(200).json({
+      success: true,
+      message: "Food item deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const deleteFood = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
 
     const result = await FoodService.delete(id as string);
 

@@ -20,8 +20,8 @@ export class OrderModel extends Model<
   declare deliveryFee: number;
   declare transactionId?: string | null;
   declare totalAmount: number;
-  declare paymentReference: CreationOptional<string>;
-  declare paymentMethod: "BANK_TRANSFER" | "CARD" | "CASH_ON_DELIVERY";
+  declare paymentReference: CreationOptional<string | null>;
+  // declare paymentMethod: "BANK_TRANSFER" | "CARD" | "CASH_ON_DELIVERY";
   declare paymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
   declare orderStatus:
     | "PENDING_PAYMENT"
@@ -73,17 +73,17 @@ OrderModel.init(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    paymentMethod: {
-      type: DataTypes.ENUM("BANK_TRANFER", "CARD", "CASH_ON_DELIVERY"),
-      allowNull: false,
-    },
+    // paymentMethod: {
+    //   type: DataTypes.ENUM("BANK_TRANSFER", "CARD", "CASH_ON_DELIVERY"),
+    //   allowNull: false,
+    // },
     paymentStatus: {
       type: DataTypes.ENUM("PENDING", "PAID", "FAILED", "REFUNDED"),
       allowNull: false,
     },
     paymentReference: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     transactionId: {
       type: DataTypes.STRING,

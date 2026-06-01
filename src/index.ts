@@ -9,9 +9,13 @@ import notFound from "./middlewares/notFound";
 import { ErrorHandler } from "./errors/errorHandler";
 import foodRouter from "./routes/food.route";
 import categoryRouter from "./routes/category.route";
+import reservationRouter from "./routes/reservation.route";
+import webhookRouter from "./routes/webhook.routes";
+import "./models/index";
 
 const app: Application = express();
 
+app.use("/webhook", webhookRouter);
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -38,6 +42,7 @@ app.get("/health", (_req, res) => {
 app.use("/order", orderRouter);
 app.use("/food", foodRouter);
 app.use("/category", categoryRouter);
+app.use("/reservation", reservationRouter);
 
 //error handlers
 app.use(notFound);

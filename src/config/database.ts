@@ -21,7 +21,7 @@ export async function connectDatabase() {
   try {
     await sequelize.authenticate();
 
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     console.log("✅ Database connected successfully");
   } catch (error) {
     console.error("❌ Database connection failed:", error);

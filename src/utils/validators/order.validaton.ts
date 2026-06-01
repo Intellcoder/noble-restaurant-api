@@ -1,35 +1,25 @@
-// validators/order.validation.ts
-
 import { z } from "zod";
 
-/**
- * ----------------------------------------
- * ORDER ITEM SCHEMA
- * ----------------------------------------
- */
 export const orderItemSchema = z.object({
-  foodId: z.uuid("Invalid food ID"),
+  foodId: z.string("Invalid food ID"),
 
   foodName: z.string().min(2, "Food name is required"),
 
-  quantity: z.number().min(1, "Quantity must be at least 1"),
+  quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
 
-  unitPrice: z.number().min(1, "Price must be greater than 0"),
+  unitPrice: z.coerce.number().min(1, "Price must be greater than 0"),
 });
 
-/**
- * ----------------------------------------
- * CREATE ORDER SCHEMA
- * ----------------------------------------
- */
 export const createOrderSchema = z.object({
   phoneNumber: z
     .string()
     .regex(/^(\+234|0)[789][01]\d{8}$/, "Invalid Nigerian phone number"),
 
-  deliveryAddress: z.string().max(300).optional(),
+  deliveryType: z.enum(["DELIVERY", "PICKUP"]),
 
-  paymentMethod: z.enum(["BANK_TRANSFER", "CARD"]),
+  deliveryAddress: z.string().optional(),
+
+  //   paymentMethod: z.enum(["BANK_TRANSFER", "CARD"]),
 
   items: z.array(orderItemSchema).min(1, "At least one food item is required"),
 });

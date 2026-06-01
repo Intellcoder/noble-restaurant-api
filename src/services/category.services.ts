@@ -1,4 +1,6 @@
+import { col, fn } from "sequelize";
 import { CategoryModel } from "../models/category.model";
+import { FoodModel } from "../models/foods.model";
 import { CreateCategoryDto } from "../types/category.types";
 
 export class CategoryServices {
@@ -14,7 +16,20 @@ export class CategoryServices {
   }
 
   static async getAllCategories() {
-    const categories = await CategoryModel.findAll();
+    const categories = await CategoryModel.findAll({
+      include: [
+        {
+          model: FoodModel,
+          as: "foods",
+          attributes: [],
+        },
+      ],
+      attributes: {
+        include: [[fn("COUNT", col("foods.id")), "foodsCount"]],
+      },
+      group: ["CategoryModel.id"],
+      order: [["createdAt", "DESC"]],
+    });
 
     return categories;
   }

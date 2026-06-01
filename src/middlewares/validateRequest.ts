@@ -1,27 +1,21 @@
-// middlewares/validateRequest.ts
-
 import { Request, Response, NextFunction } from "express";
-
-import { ZodObject } from "zod";
+import { z } from "zod";
 
 export const validate =
-  (schema: ZodObject) =>
+  (schema: z.ZodObject) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       console.log("BODY:", req.body);
 
-      const validatedData = await schema.parseAsync(req.body);
-
-      req.body = validatedData;
+      req.body = await schema.parseAsync(req.body);
 
       next();
     } catch (error: any) {
-      console.log(error);
-
+      console.log("validation error:", error);
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: error?.issues || [],
+        errors: error?.issues ?? [],
       });
     }
   };

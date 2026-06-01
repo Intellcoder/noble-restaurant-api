@@ -8,6 +8,8 @@ import { OrderItemModel } from "../models/orderItem.model";
 import { CreateOrderDto } from "../types";
 
 import { WhatsAppService } from "../services/whatsapp.services";
+import { PaymentService } from "../utils/Payment";
+import axios from "axios";
 
 const whatsappService = new WhatsAppService();
 
@@ -31,15 +33,11 @@ export class OrderServices {
    * CREATE ORDER
    * ----------------------------------------
    */
+
   static async createOrder(payload: CreateOrderDto) {
     const transaction = await sequelize.transaction();
 
     try {
-      /**
-       * --------------------------------
-       * CALCULATE TOTALS
-       * --------------------------------
-       */
       const subtotal = payload.items.reduce(
         (acc, item) => acc + item.quantity * item.unitPrice,
         0,
@@ -49,21 +47,12 @@ export class OrderServices {
 
       const totalAmount = subtotal + deliveryFee;
 
-      /**
-       * --------------------------------
-       * GENERATE ORDER NUMBER
-       * --------------------------------
-       */
       const orderNumber = this.generateOrderNumber();
 
-      /**
-       * --------------------------------
-       * CREATE ORDER
-       * --------------------------------
-       */
       const order = await OrderModel.create(
         {
           orderNumber,
+
           phoneNumber: payload.phoneNumber,
 
           deliveryType: payload.deliveryType,
@@ -76,22 +65,17 @@ export class OrderServices {
 
           totalAmount,
 
-          paymentMethod: payload.paymentMethod,
+          // paymentMethod: payload.paymentMethod,
 
           paymentStatus: "PENDING",
 
           orderStatus: "PENDING_PAYMENT",
+
           transactionId: null,
         },
-
         { transaction },
       );
 
-      /**
-       * --------------------------------
-       * CREATE ORDER ITEMS
-       * --------------------------------
-       */
       const orderItems = payload.items.map((item) => ({
         orderId: order.id,
 
@@ -106,62 +90,46 @@ export class OrderServices {
         totalPrice: item.quantity * item.unitPrice,
       }));
 
-      await OrderItemModel.bulkCreate(orderItems, {
-        transaction,
+      await OrderItemModel.bulkCreate(orderItems, { transaction });
+
+      // Initialize payment
+      const payment = await PaymentService.initializePayment({
+        amount: totalAmount,
+
+        orderNumber,
+
+        phoneNumber: payload.phoneNumber,
       });
 
-      /**
-       * --------------------------------
-       * COMMIT TRANSACTION
-       * --------------------------------
-       */
+      // Save transaction reference
+      await order.update(
+        {
+          transactionId: payment.transactionReference,
+          paymentReference: payment.transactionReference,
+        },
+        { transaction },
+      );
+
       await transaction.commit();
-
-      /**
-       * --------------------------------
-       * SEND PENDING ORDER TO ADMIN
-       * --------------------------------
-       */
-      try {
-        await whatsappService.sendAdminOrderNotification({
-          orderNumber: order.orderNumber,
-
-          phoneNumber: order.phoneNumber,
-
-          totalAmount: order.totalAmount,
-        });
-      } catch (error) {
-        console.error("Admin WhatsApp Error:", error);
-      }
-
-      /**
-       * --------------------------------
-       * SEND CUSTOMER MESSAGE
-       * --------------------------------
-       */
-      try {
-        await whatsappService.sendOrderConfirmation(
-          order.phoneNumber,
-
-          order.orderNumber,
-
-          order.totalAmount,
-        );
-      } catch (error) {
-        console.error("Customer WhatsApp Error:", error);
-      }
-
+      console.log("payment", payment.responseBody);
+      console.log("paymentref", payment.transactionReference);
       return {
         success: true,
 
-        message: "Order created successfully",
+        message: "Order created. Awaiting payment",
 
-        data: order,
+        data: {
+          order,
+
+          paymentLink: payment.checkoutUrl,
+
+          transactionReference: payment.transactionReference,
+        },
       };
     } catch (error) {
       await transaction.rollback();
 
-      console.error(error);
+      console.log(error);
 
       throw new Error("Failed to create order");
     }
@@ -246,12 +214,13 @@ export class OrderServices {
    * VERIFY PAYMENT
    * ----------------------------------------
    */
-  static async verifyPayment(
-    orderId: string,
-
-    paymentReference: string,
-  ) {
-    const order = await OrderModel.findByPk(orderId);
+  static async verifyPayment(orderId: string) {
+    console.log("running");
+    const order = await OrderModel.findOne({
+      where: {
+        orderNumber: orderId,
+      },
+    });
 
     if (!order) {
       throw new Error("Order not found");
@@ -266,14 +235,14 @@ export class OrderServices {
     // TODO:
     // VERIFY WITH MONIEPOINT/PAYSTACK
 
-    const paymentVerified = true;
+    const paymentVerified = order.paymentStatus;
 
     /**
      * --------------------------------
      * PAYMENT FAILED
      * --------------------------------
      */
-    if (!paymentVerified) {
+    if (paymentVerified !== "PAID") {
       order.paymentStatus = "FAILED";
 
       order.orderStatus = "FAILED";
@@ -296,8 +265,6 @@ export class OrderServices {
 
     order.orderStatus = "CONFIRMED";
 
-    order.paymentReference = paymentReference;
-
     await order.save();
 
     /**
@@ -305,40 +272,40 @@ export class OrderServices {
      * SEND PAYMENT SUCCESS TO CUSTOMER
      * --------------------------------
      */
-    try {
-      await whatsappService.sendPaymentSuccess(
-        order.phoneNumber,
+    // try {
+    //   await whatsappService.sendPaymentSuccess(
+    //     order.phoneNumber,
 
-        order.orderNumber,
-      );
-    } catch (error) {
-      console.error("Customer payment message failed:", error);
-    }
+    //     order.orderNumber,
+    //   );
+    // } catch (error) {
+    //   console.error("Customer payment message failed:", error);
+    // }
 
     /**
      * --------------------------------
      * SEND CONFIRMED ORDER TO ADMIN
      * --------------------------------
      */
-    try {
-      await whatsappService.sendMessage({
-        phone: process.env.ADMIN_PHONE!,
+    //     try {
+    //       await whatsappService.sendMessage({
+    //         phone: process.env.ADMIN_PHONE!,
 
-        message: `
-🟢 PAYMENT CONFIRMED
+    //         message: `
+    // 🟢 PAYMENT CONFIRMED
 
-Order:
-${order.orderNumber}
+    // Order:
+    // ${order.orderNumber}
 
-Total:
-₦${order.totalAmount}
+    // Total:
+    // ₦${order.totalAmount}
 
-START PREPARING ORDER 🍽️
-`,
-      });
-    } catch (error) {
-      console.error("Admin confirmation message failed:", error);
-    }
+    // START PREPARING ORDER 🍽️
+    // `,
+    //       });
+    //     } catch (error) {
+    //       console.error("Admin confirmation message failed:", error);
+    //     }
 
     return {
       success: true,

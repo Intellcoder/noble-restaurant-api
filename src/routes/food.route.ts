@@ -4,6 +4,7 @@ import {
   getFoodById,
   updateFood,
   getAllFoods,
+  deleteFood,
 } from "../controllers/foods.controllers";
 import { validate } from "../middlewares/validateRequest";
 import { createFoodSchema } from "../utils/validators/food.validators";
@@ -17,5 +18,9 @@ router.post(
   validate(createFoodSchema),
   createFood,
 );
+router.get("/", getAllFoods);
+router.get("/:id", getFoodById);
+router.put("/:id", upload.single("image"), updateFood);
+router.delete("/:id", deleteFood);
 
 export default router;

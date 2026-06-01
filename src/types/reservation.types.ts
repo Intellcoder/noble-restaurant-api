@@ -8,13 +8,15 @@ export interface Reservation {
 }
 
 export interface CreateReservationDto {
-  fullname: string;
+  fullName: string;
 
-  phoneNumber: string;
-
+  phone: string;
+  email: string;
+  occasion: string;
+  specialRequest: string;
   date: string;
 
   time: string;
 
-  noOfGuests: number;
+  noOfGuest: number;
 }

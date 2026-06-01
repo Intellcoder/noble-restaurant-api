@@ -1,4 +1,4 @@
-import { success } from "zod";
+import { customError } from "../errors/errorHandler";
 import { ReservationService } from "../services/reservation.services";
 import { Request, Response, NextFunction } from "express";
 
@@ -19,7 +19,7 @@ export const createReservation = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Error occurred", 500));
   }
 };
 
@@ -39,7 +39,7 @@ export const getAllReservations = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Error occurred", 500));
   }
 };
 
@@ -59,6 +59,29 @@ export const getReservationById = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Error occurred", 500));
+  }
+};
+
+export const updateReservation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    return next(customError("Error occurred", 500));
+  }
+};
+export const deletReservation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    return next(customError("Error occurred", 500));
   }
 };
