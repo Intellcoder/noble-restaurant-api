@@ -21,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://noble-restaurant.ng",
   "https://www.noble-restaurant.ng",
+  "https://noble-restaurant.onrender.com/",
 ];
 
 app.use(
