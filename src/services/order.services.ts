@@ -315,6 +315,83 @@ export class OrderServices {
       data: order,
     };
   }
+  static async verifyOrder(orderId: string) {
+    console.log("running");
+    const order = await OrderModel.findOne({
+      where: {
+        orderNumber: orderId,
+      },
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    order.paymentStatus = "PAID";
+    order.orderStatus = "PAID";
+    /**
+     * --------------------------------
+     * VERIFY FROM PAYMENT PROVIDER
+     * --------------------------------
+     */
+
+    // TODO:
+    // VERIFY WITH MONIEPOINT/PAYSTACK
+
+    order.paymentStatus = "PAID";
+
+    order.orderStatus = "CONFIRMED";
+
+    await order.save();
+
+    /**
+     * --------------------------------
+     * SEND PAYMENT SUCCESS TO CUSTOMER
+     * --------------------------------
+     */
+    // try {
+    //   await whatsappService.sendPaymentSuccess(
+    //     order.phoneNumber,
+
+    //     order.orderNumber,
+    //   );
+    // } catch (error) {
+    //   console.error("Customer payment message failed:", error);
+    // }
+
+    /**
+     * --------------------------------
+     * SEND CONFIRMED ORDER TO ADMIN
+     * --------------------------------
+     */
+    //     try {
+    //       await whatsappService.sendMessage({
+    //         phone: process.env.ADMIN_PHONE!,
+
+    //         message: `
+    // 🟢 PAYMENT CONFIRMED
+
+    // Order:
+    // ${order.orderNumber}
+
+    // Total:
+    // ₦${order.totalAmount}
+
+    // START PREPARING ORDER 🍽️
+    // `,
+    //       });
+    //     } catch (error) {
+    //       console.error("Admin confirmation message failed:", error);
+    //     }
+
+    return {
+      success: true,
+
+      message: "Payment verified successfully",
+
+      data: order,
+    };
+  }
 
   /**
    * ----------------------------------------

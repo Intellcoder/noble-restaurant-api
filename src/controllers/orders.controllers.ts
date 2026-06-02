@@ -99,7 +99,7 @@ export const verifyPayment = async (
     if (!orderId || Array.isArray(orderId)) {
       throw new Error("Invalid order id");
     }
-    const result = await OrderServices.verifyPayment(orderId);
+    const result = await OrderServices.verifyOrder(orderId);
 
     return res.status(200).json({
       success: true,
@@ -147,7 +147,7 @@ export const deleteOrder = async (
 ) => {
   try {
     const { orderId } = req.params;
-
+    console.log("running delete");
     if (!orderId || Array.isArray(orderId)) {
       throw new Error("Invalid order id");
     }

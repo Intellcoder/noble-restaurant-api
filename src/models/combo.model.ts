@@ -43,7 +43,7 @@ ComboModel.init(
       allowNull: true,
     },
     price: {
-      type: DataTypes.DECIMAL(2, 10),
+      type: DataTypes.DECIMAL(10, 5),
       allowNull: false,
     },
     image: {

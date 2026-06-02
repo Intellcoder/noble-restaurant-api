@@ -7,6 +7,7 @@ import { logger } from "./config/index";
 import orderRouter from "./routes/order.route";
 import notFound from "./middlewares/notFound";
 import { ErrorHandler } from "./errors/errorHandler";
+import comboRouter from "./routes/combo.routes";
 import foodRouter from "./routes/food.route";
 import categoryRouter from "./routes/category.route";
 import reservationRouter from "./routes/reservation.route";
@@ -59,6 +60,7 @@ app.get("/health", (_req, res) => {
 //initialize routes
 app.use("/order", orderRouter);
 app.use("/food", foodRouter);
+app.use("/combo", comboRouter);
 app.use("/category", categoryRouter);
 app.use("/reservation", reservationRouter);
 

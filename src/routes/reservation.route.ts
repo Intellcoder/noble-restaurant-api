@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createReservation,
-  deletReservation,
+  deleteReservation,
   getAllReservations,
   getReservationById,
   updateReservation,
@@ -15,6 +15,6 @@ router.post("/", validate(createReservationSchema), createReservation);
 router.get("/", getAllReservations);
 router.get("/:id", getReservationById);
 router.put("/id", updateReservation);
-router.delete("/id", deletReservation);
+router.delete("/id", deleteReservation);
 
 export default router;

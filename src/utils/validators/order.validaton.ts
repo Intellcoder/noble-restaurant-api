@@ -8,6 +8,8 @@ export const orderItemSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
 
   unitPrice: z.coerce.number().min(1, "Price must be greater than 0"),
+
+  imageUrl: z.string().min(3, "image is required"),
 });
 
 export const createOrderSchema = z.object({
