@@ -9,7 +9,8 @@ import { CreateOrderDto } from "../types";
 
 import { WhatsAppService } from "../services/whatsapp.services";
 import { PaymentService } from "../utils/Payment";
-import axios from "axios";
+import EmailService from "../utils/mailservices";
+import { adminOrderTemplate } from "../utils/template";
 
 const whatsappService = new WhatsAppService();
 
@@ -111,8 +112,33 @@ export class OrderServices {
       );
 
       await transaction.commit();
-      console.log("payment", payment.responseBody);
-      console.log("paymentref", payment.transactionReference);
+
+      // Send admin notification (async)
+      const mail = await EmailService.sendMail({
+        to: process.env.ADMIN_EMAIL!,
+        subject: `🍽 New Order ${orderNumber}`,
+
+        html: adminOrderTemplate({
+          orderNumber,
+
+          customerPhone: payload.phoneNumber,
+
+          deliveryType: payload.deliveryType,
+
+          deliveryAddress: payload.deliveryAddress,
+
+          totalAmount,
+
+          items: orderItems.map((item) => ({
+            foodName: item.foodName,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          })),
+        }),
+      }).catch((err: any) => {
+        console.log("Admin email failed:", err);
+      });
+
       return {
         success: true,
 

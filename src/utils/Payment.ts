@@ -38,7 +38,7 @@ export class PaymentService {
           },
         },
       );
-      console.log("payment response:", response.data);
+
       return response.data.responseBody;
     } catch (error) {
       console.log(error);
