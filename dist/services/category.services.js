@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryServices = void 0;
+const sequelize_1 = require("sequelize");
 const category_model_1 = require("../models/category.model");
+const foods_model_1 = require("../models/foods.model");
 class CategoryServices {
     static async create(payload) {
         const category = await category_model_1.CategoryModel.create({
@@ -13,7 +15,20 @@ class CategoryServices {
         return category;
     }
     static async getAllCategories() {
-        const categories = await category_model_1.CategoryModel.findAll();
+        const categories = await category_model_1.CategoryModel.findAll({
+            include: [
+                {
+                    model: foods_model_1.FoodModel,
+                    as: "foods",
+                    attributes: [],
+                },
+            ],
+            attributes: {
+                include: [[(0, sequelize_1.fn)("COUNT", (0, sequelize_1.col)("foods.id")), "foodsCount"]],
+            },
+            group: ["CategoryModel.id"],
+            order: [["createdAt", "DESC"]],
+        });
         return categories;
     }
     static async findById(id) {

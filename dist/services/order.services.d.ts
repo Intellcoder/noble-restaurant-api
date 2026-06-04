@@ -15,7 +15,11 @@ export declare class OrderServices {
     static createOrder(payload: CreateOrderDto): Promise<{
         success: boolean;
         message: string;
-        data: OrderModel;
+        data: {
+            order: OrderModel;
+            paymentLink: any;
+            transactionReference: any;
+        };
     }>;
     /**
      * ----------------------------------------
@@ -44,11 +48,16 @@ export declare class OrderServices {
      * VERIFY PAYMENT
      * ----------------------------------------
      */
-    static verifyPayment(orderId: string, paymentReference: string): Promise<{
+    static verifyPayment(orderId: string): Promise<{
         success: boolean;
         message: string;
         data?: never;
     } | {
+        success: boolean;
+        message: string;
+        data: OrderModel;
+    }>;
+    static verifyOrder(orderId: string): Promise<{
         success: boolean;
         message: string;
         data: OrderModel;

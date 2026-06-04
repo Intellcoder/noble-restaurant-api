@@ -21,7 +21,7 @@ class ReservationService {
             where: {
                 date: payload.date,
                 time: payload.time,
-                phoneNumber: payload.phoneNumber,
+                phoneNumber: payload.phone,
             },
         });
         if (existingReservation) {
@@ -32,12 +32,17 @@ class ReservationService {
          * CREATE RESERVATION
          * ----------------------------------------
          */
+        const reservationNumber = this.generateReservationNumber(payload.fullName, payload.date);
         const reservation = await reservation_model_1.ReservationModel.create({
-            fullname: payload.fullname,
-            phoneNumber: payload.phoneNumber,
+            fullname: payload.fullName,
+            phoneNumber: payload.phone,
+            email: payload.email,
+            occasion: payload.occasion,
             date: payload.date,
+            reservationNumber: reservationNumber,
+            specialRequest: payload.specialRequest,
             time: payload.time,
-            noOfGuests: payload.noOfGuests,
+            noOfGuests: payload.noOfGuest,
         });
         /**
          * ----------------------------------------
@@ -52,8 +57,17 @@ class ReservationService {
 
 ✅ Reservation Confirmed
 
+Reservation ID:
+${reservation.reservationNumber}
+
 Name:
 ${reservation.fullname}
+
+Email:
+${reservation.email}
+
+Occasion:
+${reservation.occasion}
 
 Date:
 ${reservation.date}
@@ -82,11 +96,23 @@ We look forward to hosting you ❤️
                 message: `
 📅 NEW TABLE RESERVATION
 
+Reservation ID:
+${reservation.reservationNumber}
+
 Name:
 ${reservation.fullname}
 
 Phone:
 ${reservation.phoneNumber}
+
+Email:
+${reservation.email}
+
+Occasion:
+${reservation.occasion}
+
+Special Request:
+${reservation.specialRequest}
 
 Date:
 ${reservation.date}
@@ -167,6 +193,25 @@ ${reservation.noOfGuests}
             success: true,
             message: "Reservation deleted successfully",
         };
+    }
+    static generateReservationNumber(fullName, date) {
+        // Extract initials
+        const initials = fullName
+            .trim()
+            .split(" ")
+            .map((name) => name[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+        // Normalize date
+        const reservationDate = new Date(date);
+        const year = reservationDate.getFullYear().toString().slice(-2);
+        const month = String(reservationDate.getMonth() + 1).padStart(2, "0");
+        const day = String(reservationDate.getDate()).padStart(2, "0");
+        const datePart = `${year}${month}${day}`;
+        // Generate random string
+        const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return `NB-${initials}-${datePart}-${randomPart}`;
     }
 }
 exports.ReservationService = ReservationService;

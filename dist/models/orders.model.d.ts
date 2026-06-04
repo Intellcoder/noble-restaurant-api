@@ -9,8 +9,7 @@ export declare class OrderModel extends Model<InferAttributes<OrderModel>, Infer
     deliveryFee: number;
     transactionId?: string | null;
     totalAmount: number;
-    paymentReference: CreationOptional<string>;
-    paymentMethod: "BANK_TRANSFER" | "CARD" | "CASH_ON_DELIVERY";
+    paymentReference: CreationOptional<string | null>;
     paymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
     orderStatus: "PENDING_PAYMENT" | "PAID" | "CONFIRMED" | "DELIVERED" | "CANCELLED" | "FAILED" | "OUT_FOR_DELIVERY";
     whatsappNotificationSent?: boolean;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getReservationById = exports.getAllReservations = exports.createReservation = void 0;
+exports.deleteReservation = exports.updateReservation = exports.getReservationById = exports.getAllReservations = exports.createReservation = void 0;
 const reservation_services_1 = require("../services/reservation.services");
 const createReservation = async (req, res, next) => {
     try {
@@ -48,4 +48,34 @@ const getReservationById = async (req, res, next) => {
     }
 };
 exports.getReservationById = getReservationById;
+const updateReservation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await reservation_services_1.ReservationService.getReservationById(id);
+        return res.status(200).json({
+            success: true,
+            result,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+exports.updateReservation = updateReservation;
+const deleteReservation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const result = await reservation_services_1.ReservationService.getReservationById(id);
+        return res.status(200).json({
+            success: true,
+            result,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
+exports.deleteReservation = deleteReservation;
 //# sourceMappingURL=reservation.controllers.js.map

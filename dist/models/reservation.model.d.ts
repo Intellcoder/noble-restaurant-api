@@ -3,6 +3,10 @@ export declare class ReservationModel extends Model<InferAttributes<ReservationM
     id: CreationOptional<string>;
     fullname: string;
     phoneNumber: string;
+    email: CreationOptional<string>;
+    specialRequest: CreationOptional<string>;
+    reservationNumber: string;
+    occasion: string;
     date: string;
     time: string;
     noOfGuests: number;

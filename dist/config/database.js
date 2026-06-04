@@ -19,7 +19,7 @@ exports.sequelize = new sequelize_1.Sequelize(index_1.env.DATABASE_URL, {
 async function connectDatabase() {
     try {
         await exports.sequelize.authenticate();
-        await exports.sequelize.sync({ alter: false });
+        await exports.sequelize.sync({ alter: true });
         console.log("✅ Database connected successfully");
     }
     catch (error) {

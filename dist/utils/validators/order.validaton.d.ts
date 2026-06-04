@@ -1,32 +1,22 @@
 import { z } from "zod";
-/**
- * ----------------------------------------
- * ORDER ITEM SCHEMA
- * ----------------------------------------
- */
 export declare const orderItemSchema: z.ZodObject<{
-    foodId: z.ZodUUID;
+    foodId: z.ZodString;
     foodName: z.ZodString;
-    quantity: z.ZodNumber;
-    unitPrice: z.ZodNumber;
+    quantity: z.ZodCoercedNumber<unknown>;
+    unitPrice: z.ZodCoercedNumber<unknown>;
 }, z.core.$strip>;
-/**
- * ----------------------------------------
- * CREATE ORDER SCHEMA
- * ----------------------------------------
- */
 export declare const createOrderSchema: z.ZodObject<{
     phoneNumber: z.ZodString;
-    deliveryAddress: z.ZodOptional<z.ZodString>;
-    paymentMethod: z.ZodEnum<{
-        BANK_TRANSFER: "BANK_TRANSFER";
-        CARD: "CARD";
+    deliveryType: z.ZodEnum<{
+        DELIVERY: "DELIVERY";
+        PICKUP: "PICKUP";
     }>;
+    deliveryAddress: z.ZodOptional<z.ZodString>;
     items: z.ZodArray<z.ZodObject<{
-        foodId: z.ZodUUID;
+        foodId: z.ZodString;
         foodName: z.ZodString;
-        quantity: z.ZodNumber;
-        unitPrice: z.ZodNumber;
+        quantity: z.ZodCoercedNumber<unknown>;
+        unitPrice: z.ZodCoercedNumber<unknown>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
 /**

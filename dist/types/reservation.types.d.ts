@@ -7,10 +7,13 @@ export interface Reservation {
     noOfGuests: number;
 }
 export interface CreateReservationDto {
-    fullname: string;
-    phoneNumber: string;
+    fullName: string;
+    phone: string;
+    email: string;
+    occasion: string;
+    specialRequest: string;
     date: string;
     time: string;
-    noOfGuests: number;
+    noOfGuest: number;
 }
 //# sourceMappingURL=reservation.types.d.ts.map

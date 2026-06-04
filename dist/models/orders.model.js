@@ -42,17 +42,17 @@ OrderModel.init({
         type: sequelize_1.DataTypes.DECIMAL(10, 2),
         allowNull: false,
     },
-    paymentMethod: {
-        type: sequelize_1.DataTypes.ENUM("BANK_TRANFER", "CARD", "CASH_ON_DELIVERY"),
-        allowNull: false,
-    },
+    // paymentMethod: {
+    //   type: DataTypes.ENUM("BANK_TRANSFER", "CARD", "CASH_ON_DELIVERY"),
+    //   allowNull: false,
+    // },
     paymentStatus: {
         type: sequelize_1.DataTypes.ENUM("PENDING", "PAID", "FAILED", "REFUNDED"),
         allowNull: false,
     },
     paymentReference: {
         type: sequelize_1.DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     transactionId: {
         type: sequelize_1.DataTypes.STRING,

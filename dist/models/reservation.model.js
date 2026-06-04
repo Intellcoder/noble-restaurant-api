@@ -17,7 +17,23 @@ ReservationModel.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
+    email: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
     phoneNumber: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
+    specialRequest: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    occasion: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
+    reservationNumber: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },

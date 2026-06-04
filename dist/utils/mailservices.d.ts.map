@@ -1,1 +1,1 @@
-{"version":3,"file":"mailservices.d.ts","sourceRoot":"","sources":["../../src/utils/mailservices.ts"],"names":[],"mappings":""}
+{"version":3,"file":"mailservices.d.ts","sourceRoot":"","sources":["../../src/utils/mailservices.ts"],"names":[],"mappings":"AAEA,cAAM,YAAY;IAChB,OAAO,CAAC,WAAW,CAAC;;IAmBd,QAAQ,CAAC,EACb,EAAE,EACF,OAAO,EACP,IAAI,GACL,EAAE;QACD,EAAE,EAAE,MAAM,CAAC;QACX,OAAO,EAAE,MAAM,CAAC;QAChB,IAAI,EAAE,MAAM,CAAC;KACd;CAiBF;;AAED,wBAAkC"}

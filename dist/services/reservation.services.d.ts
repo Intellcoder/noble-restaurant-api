@@ -1,5 +1,5 @@
 import { ReservationModel } from "../models/reservation.model";
-import { type CreateReservationDto } from "../types";
+import { CreateReservationDto } from "../types";
 export declare class ReservationService {
     /**
      * ----------------------------------------
@@ -46,5 +46,6 @@ export declare class ReservationService {
         success: boolean;
         message: string;
     }>;
+    private static generateReservationNumber;
 }
 //# sourceMappingURL=reservation.services.d.ts.map

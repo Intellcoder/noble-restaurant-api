@@ -41,7 +41,6 @@ export interface CreateOrderDto {
     phoneNumber: string;
     deliveryType: "DELIVERY" | "PICKUP";
     deliveryAddress: string;
-    paymentMethod: "BANK_TRANSFER" | "CARD" | "CASH_ON_DELIVERY";
     items: createOrderItemDto[];
 }
 //# sourceMappingURL=order.types.d.ts.map
