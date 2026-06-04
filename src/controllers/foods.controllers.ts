@@ -35,9 +35,11 @@ export const getFoodById = async (
   next: NextFunction,
 ) => {
   try {
-    const { id } = req.body;
+    console.log("Passed here ");
+    const { id } = req.params;
 
-    const result = await FoodService.findById(id);
+    console.log("Id:", id);
+    const result = await FoodService.findById(id as string);
 
     return res.status(200).json({
       success: true,

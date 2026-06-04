@@ -14,7 +14,7 @@ const router = Router();
 router.post("/", validate(createReservationSchema), createReservation);
 router.get("/", getAllReservations);
 router.get("/:id", getReservationById);
-router.put("/id", updateReservation);
-router.delete("/id", deleteReservation);
+router.put("/:id", updateReservation);
+router.delete("/:id", deleteReservation);
 
 export default router;

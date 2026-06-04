@@ -1,6 +1,7 @@
 import { success } from "zod";
 import { ReservationService } from "../services/reservation.services";
 import { Request, Response, NextFunction } from "express";
+import { customError } from "../errors/errorHandler";
 
 export const createReservation = async (
   req: Request,
@@ -19,7 +20,7 @@ export const createReservation = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Operation Failed", 500));
   }
 };
 
@@ -39,7 +40,7 @@ export const getAllReservations = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Operation Failed", 500));
   }
 };
 
@@ -59,7 +60,7 @@ export const getReservationById = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Operation Failed", 500));
   }
 };
 
@@ -79,7 +80,7 @@ export const updateReservation = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Operation Failed", 500));
   }
 };
 export const deleteReservation = async (
@@ -98,6 +99,6 @@ export const deleteReservation = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Operation Failed", 500));
   }
 };

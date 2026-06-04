@@ -11,6 +11,7 @@ export const CreateCombos = async (
     console.log("creating combo with datas", data);
     const combos = await ComboService.createCombo(data);
 
+    console.log("combos in controller:", combos);
     return res.status(201).json({
       success: true,
       data: combos,
@@ -26,13 +27,16 @@ export const getAllCombos = async (
   next: NextFunction,
 ) => {
   try {
+    console.log("getting combos");
     const combos = await ComboService.getAllCombos();
 
+    console.log("Returned combos:", combos);
     return res.status(200).json({
       success: true,
       data: combos,
     });
   } catch (error) {
+    console.log("error:", error);
     return next(error);
   }
 };

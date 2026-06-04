@@ -1,5 +1,6 @@
 import { CategoryModel } from "./category.model";
 import { ComboModel } from "./combo.model";
+import { ComboItemModel } from "./comboItems.model";
 import { FoodModel } from "./foods.model";
 import { OrderItemModel } from "./orderItem.model";
 import { OrderModel } from "./orders.model";
@@ -25,9 +26,14 @@ OrderItemModel.belongsTo(FoodModel, {
   as: "foodItem",
 });
 
-ComboModel.belongsToMany(FoodModel, {
-  through: "ComboFoodItems",
+// associations.ts
+
+ComboModel.hasMany(ComboItemModel, {
+  foreignKey: "comboId",
   as: "items",
+});
+
+ComboItemModel.belongsTo(ComboModel, {
   foreignKey: "comboId",
 });
 

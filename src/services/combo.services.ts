@@ -38,6 +38,7 @@ export class ComboService {
       if (foods.length < 2) {
         throw new Error("Select at least 2 foods");
       }
+
       const combo = await ComboModel.create(
         {
           name: payload.name,
@@ -60,26 +61,30 @@ export class ComboService {
 
       await ComboItemModel.bulkCreate(comboItems, { transaction });
 
+      await transaction.commit();
+
       return combo;
     } catch (error) {
+      await transaction.rollback();
+
       console.log(error);
+
+      throw error;
     }
   }
 
-  /* =========================
-     GET ALL COMBOS
-  ========================== */
   static async getAllCombos() {
-    return ComboModel.findAll({
+    const combos = await ComboModel.findAll({
       include: [
         {
           model: ComboItemModel,
           as: "items",
-          through: { attributes: [] },
         },
       ],
       order: [["createdAt", "DESC"]],
     });
+
+    return combos;
   }
 
   /* =========================
