@@ -22,9 +22,9 @@ export class PaymentService {
       let configData = {
         email: "noblerestaurantng@gmail.com",
         amount: data.amount * 100,
-        callback_url: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+        callback_url: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference=${data.orderNumber}`,
         metadata: {
-          cancel_action: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+          cancel_action: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference=${data.orderNumber}`,
           orderNumber: data.orderNumber,
         },
       };
@@ -39,7 +39,15 @@ export class PaymentService {
         },
       );
 
-      return response.data;
+      const {
+        data: { access_code, authorization_url, reference },
+      } = response.data;
+
+      return {
+        reference,
+        authorization_url,
+        access_code,
+      };
     } catch (error) {
       console.log(error);
       throw new Error("Payment initialization failed");
@@ -70,126 +78,68 @@ export class PaymentService {
   }
 
   static async verifyPayment(orderNumber: string) {
-    console.log("Payment ref from moniffy:", orderNumber);
-    const order = await OrderModel.findOne({
-      where: { orderNumber },
-    });
-
-    if (!order) {
-      throw new Error("Order not found");
-    }
-
-    let paymentVerified = false;
-    const transactionReference = order.paymentReference;
-
-    if (!transactionReference) {
-      throw new Error(
-        "Order has no payment refrence - cannot verify with monnify",
-      );
-    }
-
     try {
-      const accessToken = await this.getAccessToken();
-      const baseUrl = process.env.MONNIFY_BASE_URL!;
+      console.log("running here");
 
-      const encodeRef = encodeURIComponent(transactionReference);
-
-      const { data } = await axios.get(`${baseUrl}/transactions/${encodeRef}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      const order = await OrderModel.findOne({
+        where: {
+          orderNumber,
         },
       });
 
-      const { paymentStatus, amountPaid } = data.responseBody;
+      if (!order) {
+        throw new Error("Order not found");
+      }
 
-      const amountMatches = Number(amountPaid) >= Number(order.totalAmount);
-
-      paymentVerified = paymentStatus === "PAID" && amountMatches;
-
-      if (!amountMatches) {
-        console.warn(
-          `[verifyPayment] Amount mismatch — expected: ${order.totalAmount}, paid: ${amountPaid}, ref: ${transactionReference}`,
-        );
+      if (order.paymentStatus === "PAID") {
       }
     } catch (error: any) {
-      console.error(
-        "[verifyPayment] Monnify verification API error:",
-        error?.response?.data ?? error?.message,
-      );
-      // Rethrow so the caller (webhook or controller) can handle it
-      throw new Error("Payment verification failed — Monnify API error");
+      console.log("error:", error);
     }
 
-    if (!paymentVerified) {
-      order.paymentStatus = "FAILED";
-      order.orderStatus = "FAILED";
-      await order.save();
-
-      return {
-        success: false,
-        message: "Payment verification failed",
-      };
-    }
-
-    if (order.paymentStatus === "PAID") {
-      console.info(
-        `[verifyPayment] Order already verified — skipping. ref: ${orderNumber}`,
-      );
-      return {
-        success: true,
-        message: "Payment already verified",
-        data: order,
-      };
-    }
-
-    order.paymentStatus = "PAID";
-    order.orderStatus = "CONFIRMED";
-
-    await order.save();
-
-    try {
-      await whatsappService.sendPaymentSuccess(
-        order.phoneNumber,
-        order.orderNumber,
-      );
-    } catch (error) {
-      console.error("[verifyPayment] Customer WhatsApp message failed:", error);
-    }
+    // try {
+    //   await whatsappService.sendPaymentSuccess(
+    //     order.phoneNumber,
+    //     order.orderNumber,
+    //   );
+    // } catch (error) {
+    //   console.error("[verifyPayment] Customer WhatsApp message failed:", error);
+    // }
 
     /**
      * ─────────────────────────────────────────────────────────────
      * NOTIFY ADMIN
      * ─────────────────────────────────────────────────────────────
      */
-    try {
-      await whatsappService.sendMessage({
-        phone: process.env.ADMIN_PHONE!,
-        message: `
-🟢 PAYMENT CONFIRMED
- 
-Order: ${order.orderNumber}
-Total: ₦${Number(order.totalAmount).toLocaleString()}
- 
-START PREPARING ORDER 🍽️
-        `.trim(),
-      });
-    } catch (error) {
-      console.error("[verifyPayment] Admin WhatsApp message failed:", error);
-    }
+    //     try {
+    //       await whatsappService.sendMessage({
+    //         phone: process.env.ADMIN_PHONE!,
+    //         message: `
+    // 🟢 PAYMENT CONFIRMED
+
+    // Order: ${order.orderNumber}
+    // Total: ₦${Number(order.totalAmount).toLocaleString()}
+
+    // START PREPARING ORDER 🍽️
+    //         `.trim(),
+    //       });
+    //     } catch (error) {
+    //       console.error("[verifyPayment] Admin WhatsApp message failed:", error);
+    //     }
 
     return {
       success: true,
       message: "Payment verified successfully",
-      data: order,
+      data: "",
     };
   }
 
-  static async verifySignature(rawBody: string, signature: string) {
+  static async verifySignature(rawBody: Buffer, signature: string) {
     const hash = crypto
       .createHmac("sha512", process.env.PAYSTACK_API_KEY!)
       .update(rawBody)
       .digest("hex");
-    console.log("running hash");
+
     return hash === signature;
   }
 
@@ -200,12 +150,12 @@ START PREPARING ORDER 🍽️
       switch (event.event) {
         case "charge.success": {
           const data = event.data;
-          console.log("charge success event");
+
           const paymentReference = data.reference;
 
           const order = await OrderModel.findOne({
             where: {
-              orderNumber: paymentReference,
+              paymentReference: paymentReference,
             },
             transaction,
           });
@@ -222,7 +172,7 @@ START PREPARING ORDER 🍽️
           await order.update(
             {
               paymentStatus: "PAID",
-              orderStatus: "PAID",
+              orderStatus: "PREPARING",
               transactionId: data.id.toString(),
             },
             {
@@ -230,36 +180,33 @@ START PREPARING ORDER 🍽️
             },
           );
 
-          console.log(`Payment verified for order ${order.orderNumber}`);
+          await transaction.commit();
 
           return order;
         }
 
         case "charge.failed": {
           const data = event.data;
-          console.log("charge failed event");
-          const orderNumber = data.reference;
+
+          const paymentReference = data.reference;
           const order = await OrderModel.findOne({
             where: {
-              orderNumber: orderNumber,
+              paymentReference: paymentReference,
             },
             transaction,
           });
 
-          if (order) {
-            await order.update(
-              {
-                paymentStatus: "FAILED",
-              },
-              {
-                transaction,
-              },
-            );
-
+          if (!order) {
             await transaction.commit();
 
             return;
           }
+
+          await order.update({ paymentStatus: "FAILED" }, { transaction });
+
+          await transaction.commit();
+
+          return;
         }
         default:
           console.log(`Unhandled event :${event.event}`);

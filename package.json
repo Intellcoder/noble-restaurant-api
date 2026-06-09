@@ -29,6 +29,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^5.0.4",
     "@types/nodemailer": "^8.0.0",
     "axios": "^1.16.1",
     "cloudinary": "^2.10.0",

@@ -9,8 +9,9 @@ import { CreateOrderDto } from "../types";
 
 import { WhatsAppService } from "../services/whatsapp.services";
 import { PaymentService } from "../utils/Payment";
-import EmailService from "../utils/mailservices";
+// import EmailService from "../utils/mailservices";
 import { adminOrderTemplate } from "../utils/template";
+import { EmailService } from "./email.services";
 
 const whatsappService = new WhatsAppService();
 
@@ -94,20 +95,20 @@ export class OrderServices {
       await OrderItemModel.bulkCreate(orderItems, { transaction });
 
       // Initialize payment
-      const payment = await PaymentService.initializePayment({
-        amount: totalAmount,
+      const { reference, authorization_url, access_code } =
+        await PaymentService.initializePayment({
+          amount: totalAmount,
 
-        orderNumber,
+          orderNumber,
 
-        phoneNumber: payload.phoneNumber,
-      });
+          phoneNumber: payload.phoneNumber,
+        });
 
-      console.log("payment:", payment.data);
       // Save transaction reference
       await order.update(
         {
-          transactionId: payment.data.access_code,
-          paymentReference: payment.data.reference,
+          transactionId: reference,
+          paymentReference: reference,
         },
         { transaction },
       );
@@ -116,7 +117,7 @@ export class OrderServices {
 
       // Send admin notification (async)
       const mail = await EmailService.sendMail({
-        to: process.env.ADMIN_EMAIL!,
+        to: [{ email: "noblerestaurantng@gmail.com", name: "Admin" }],
         subject: `🍽 New Order ${orderNumber}`,
 
         html: adminOrderTemplate({
@@ -136,6 +137,10 @@ export class OrderServices {
             unitPrice: item.unitPrice,
           })),
         }),
+        sender: {
+          name: "Admin@noble restaurant",
+          email: "noblerestaurantng@gmail.com",
+        },
       }).catch((err: any) => {
         console.log("Admin email failed:", err);
       });
@@ -148,9 +153,9 @@ export class OrderServices {
         data: {
           order,
 
-          paymentLink: payment.data.authorization_url,
+          paymentLink: authorization_url,
 
-          transactionReference: payment.data.reference,
+          transactionReference: reference,
         },
       };
     } catch (error) {
@@ -246,51 +251,31 @@ export class OrderServices {
       where: {
         orderNumber: orderId,
       },
+      include: [
+        {
+          model: OrderItemModel,
+          attributes: ["foodName", "quantity", "unitPrice", "totalPrice"],
+          as: "items",
+        },
+      ],
     });
 
     if (!order) {
       throw new Error("Order not found");
     }
 
-    /**
-     * --------------------------------
-     * VERIFY FROM PAYMENT PROVIDER
-     * --------------------------------
-     */
+    if (order.paymentStatus !== "PAID") {
+      order.paymentStatus = "FAILED";
 
-    // VERIFY WITH MONIEPOINT/PAYSTACK
+      order.orderStatus = "FAILED";
 
-    const verifyPayment = PaymentService.verifyPayment(orderId);
+      await order.save();
 
-    /**
-     * --------------------------------
-     * PAYMENT FAILED
-     * --------------------------------
-     */
-    // if (paymentVerified !== "PAID") {
-    //   order.paymentStatus = "FAILED";
-
-    //   order.orderStatus = "FAILED";
-
-    //   await order.save();
-
-    //   return {
-    //     success: false,
-
-    //     message: "Payment verification failed",
-    //   };
-    // }
-
-    /**
-     * --------------------------------
-     * UPDATE ORDER
-     * --------------------------------
-     */
-    // order.paymentStatus = "PAID";
-
-    // order.orderStatus = "CONFIRMED";
-
-    // await order.save();
+      return {
+        success: false,
+        message: "Payment verification failed",
+      };
+    }
 
     /**
      * --------------------------------
@@ -332,14 +317,15 @@ export class OrderServices {
     //       console.error("Admin confirmation message failed:", error);
     //     }
 
-    // return {
-    //   success: true,
+    return {
+      success: true,
 
-    //   message: "Payment verified successfully",
+      message: "Payment verified successfully",
 
-    //   data: order,
-    // };
+      data: order,
+    };
   }
+
   static async verifyOrder(orderId: string) {
     console.log("running");
     const order = await OrderModel.findOne({

@@ -124,8 +124,9 @@ export const paystackwebhook = async (
     console.log("running webhook");
     const signature = req.headers["x-paystack-signature"] as string;
 
-    const rawBody = JSON.stringify(req.body);
-    const isValid = PaymentService.verifySignature(rawBody, signature);
+    const rawBody = req.body as Buffer;
+
+    const isValid = await PaymentService.verifySignature(rawBody, signature);
 
     if (!isValid) {
       return res.status(401).json({
@@ -134,12 +135,11 @@ export const paystackwebhook = async (
       });
     }
 
-    const result = await PaymentService.handlePaystackEvent(req.body);
-    console.log("result:", result);
+    const event = JSON.parse(rawBody.toString());
+    const result = await PaymentService.handlePaystackEvent(event);
 
     return res.status(200).json({
       success: true,
-      result,
     });
   } catch (error) {
     console.log(error);

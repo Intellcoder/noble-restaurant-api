@@ -5,13 +5,13 @@ class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
 
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env.BREVO_SMTP_LOGIN,
+        pass: process.env.BREVO_SMTP_KEY,
       },
 
       connectionTimeout: 15000,
@@ -31,7 +31,7 @@ class EmailService {
   }) {
     try {
       const info = await this.transporter.sendMail({
-        from: `"Noble Restaurant" <${process.env.EMAIL_USER}>`,
+        from: `${process.env.EMAIL_USER}`,
         to,
         subject,
         html,

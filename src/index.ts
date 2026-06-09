@@ -16,7 +16,7 @@ import "./models/index";
 
 const app: Application = express();
 
-app.use("/webhook", webhookRouter);
+app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
 
 const allowedOrigins = [
   "http://localhost:5173",

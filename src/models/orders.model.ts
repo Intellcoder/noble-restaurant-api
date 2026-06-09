@@ -26,6 +26,7 @@ export class OrderModel extends Model<
   declare orderStatus:
     | "PENDING_PAYMENT"
     | "PAID"
+    | "PREPARING"
     | "CONFIRMED"
     | "DELIVERED"
     | "CANCELLED"
