@@ -99,7 +99,7 @@ export const verifyPayment = async (
     if (!orderId || Array.isArray(orderId)) {
       throw new Error("Invalid order id");
     }
-    const result = await OrderServices.verifyOrder(orderId);
+    const result = await OrderServices.verifyPayment(orderId);
 
     return res.status(200).json({
       success: true,

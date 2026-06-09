@@ -6,7 +6,6 @@ import {
   InferCreationAttributes,
   CreationOptional,
 } from "sequelize";
-import { Food } from "../types/index";
 
 export class FoodModel extends Model<
   InferAttributes<FoodModel>,

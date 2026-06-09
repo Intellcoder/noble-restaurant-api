@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteReservation = exports.updateReservation = exports.getReservationById = exports.getAllReservations = exports.createReservation = void 0;
 const reservation_services_1 = require("../services/reservation.services");
+const errorHandler_1 = require("../errors/errorHandler");
 const createReservation = async (req, res, next) => {
     try {
         const data = req.body;
@@ -14,7 +15,7 @@ const createReservation = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        next(error);
+        return next((0, errorHandler_1.customError)("Operation Failed", 500));
     }
 };
 exports.createReservation = createReservation;
@@ -29,7 +30,7 @@ const getAllReservations = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        next(error);
+        return next((0, errorHandler_1.customError)("Operation Failed", 500));
     }
 };
 exports.getAllReservations = getAllReservations;
@@ -44,7 +45,7 @@ const getReservationById = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        next(error);
+        return next((0, errorHandler_1.customError)("Operation Failed", 500));
     }
 };
 exports.getReservationById = getReservationById;
@@ -59,7 +60,7 @@ const updateReservation = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        next(error);
+        return next((0, errorHandler_1.customError)("Operation Failed", 500));
     }
 };
 exports.updateReservation = updateReservation;
@@ -74,7 +75,7 @@ const deleteReservation = async (req, res, next) => {
     }
     catch (error) {
         console.log(error);
-        next(error);
+        return next((0, errorHandler_1.customError)("Operation Failed", 500));
     }
 };
 exports.deleteReservation = deleteReservation;

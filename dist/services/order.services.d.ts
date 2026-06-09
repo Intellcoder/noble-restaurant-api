@@ -48,15 +48,7 @@ export declare class OrderServices {
      * VERIFY PAYMENT
      * ----------------------------------------
      */
-    static verifyPayment(orderId: string): Promise<{
-        success: boolean;
-        message: string;
-        data?: never;
-    } | {
-        success: boolean;
-        message: string;
-        data: OrderModel;
-    }>;
+    static verifyPayment(orderId: string): Promise<void>;
     static verifyOrder(orderId: string): Promise<{
         success: boolean;
         message: string;

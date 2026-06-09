@@ -1,3 +1,4 @@
+import { where } from "sequelize";
 import { FoodModel } from "../models/foods.model";
 import { CreatedFoodDto, UpdateFoodDto } from "../types";
 
@@ -25,7 +26,11 @@ export class FoodService {
   }
 
   static async findAll() {
-    const { count, rows } = await FoodModel.findAndCountAll();
+    const { count, rows } = await FoodModel.findAndCountAll({
+      where: {
+        isAvailable: true,
+      },
+    });
 
     return {
       total: count,

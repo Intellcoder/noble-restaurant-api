@@ -76,7 +76,7 @@ const verifyPayment = async (req, res, next) => {
         if (!orderId || Array.isArray(orderId)) {
             throw new Error("Invalid order id");
         }
-        const result = await order_services_1.OrderServices.verifyOrder(orderId);
+        const result = await order_services_1.OrderServices.verifyPayment(orderId);
         return res.status(200).json({
             success: true,
             message: `Payment verified successfully`,

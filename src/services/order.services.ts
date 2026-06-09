@@ -102,11 +102,12 @@ export class OrderServices {
         phoneNumber: payload.phoneNumber,
       });
 
+      console.log("payment:", payment.data);
       // Save transaction reference
       await order.update(
         {
-          transactionId: payment.transactionReference,
-          paymentReference: payment.transactionReference,
+          transactionId: payment.data.access_code,
+          paymentReference: payment.data.reference,
         },
         { transaction },
       );
@@ -147,9 +148,9 @@ export class OrderServices {
         data: {
           order,
 
-          paymentLink: payment.checkoutUrl,
+          paymentLink: payment.data.authorization_url,
 
-          transactionReference: payment.transactionReference,
+          transactionReference: payment.data.reference,
         },
       };
     } catch (error) {
@@ -241,7 +242,6 @@ export class OrderServices {
    * ----------------------------------------
    */
   static async verifyPayment(orderId: string) {
-    console.log("running");
     const order = await OrderModel.findOne({
       where: {
         orderNumber: orderId,
@@ -258,40 +258,39 @@ export class OrderServices {
      * --------------------------------
      */
 
-    // TODO:
     // VERIFY WITH MONIEPOINT/PAYSTACK
 
-    const paymentVerified = order.paymentStatus;
+    const verifyPayment = PaymentService.verifyPayment(orderId);
 
     /**
      * --------------------------------
      * PAYMENT FAILED
      * --------------------------------
      */
-    if (paymentVerified !== "PAID") {
-      order.paymentStatus = "FAILED";
+    // if (paymentVerified !== "PAID") {
+    //   order.paymentStatus = "FAILED";
 
-      order.orderStatus = "FAILED";
+    //   order.orderStatus = "FAILED";
 
-      await order.save();
+    //   await order.save();
 
-      return {
-        success: false,
+    //   return {
+    //     success: false,
 
-        message: "Payment verification failed",
-      };
-    }
+    //     message: "Payment verification failed",
+    //   };
+    // }
 
     /**
      * --------------------------------
      * UPDATE ORDER
      * --------------------------------
      */
-    order.paymentStatus = "PAID";
+    // order.paymentStatus = "PAID";
 
-    order.orderStatus = "CONFIRMED";
+    // order.orderStatus = "CONFIRMED";
 
-    await order.save();
+    // await order.save();
 
     /**
      * --------------------------------
@@ -333,13 +332,13 @@ export class OrderServices {
     //       console.error("Admin confirmation message failed:", error);
     //     }
 
-    return {
-      success: true,
+    // return {
+    //   success: true,
 
-      message: "Payment verified successfully",
+    //   message: "Payment verified successfully",
 
-      data: order,
-    };
+    //   data: order,
+    // };
   }
   static async verifyOrder(orderId: string) {
     console.log("running");

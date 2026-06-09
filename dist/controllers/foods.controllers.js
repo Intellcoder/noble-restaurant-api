@@ -26,7 +26,9 @@ const createFood = async (req, res, next) => {
 exports.createFood = createFood;
 const getFoodById = async (req, res, next) => {
     try {
-        const { id } = req.body;
+        console.log("Passed here ");
+        const { id } = req.params;
+        console.log("Id:", id);
         const result = await food_services_1.FoodService.findById(id);
         return res.status(200).json({
             success: true,

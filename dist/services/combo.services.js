@@ -36,26 +36,26 @@ class ComboService {
                 unitPrice: Number(food.price),
             }));
             await comboItems_model_1.ComboItemModel.bulkCreate(comboItems, { transaction });
+            await transaction.commit();
             return combo;
         }
         catch (error) {
+            await transaction.rollback();
             console.log(error);
+            throw error;
         }
     }
-    /* =========================
-       GET ALL COMBOS
-    ========================== */
     static async getAllCombos() {
-        return combo_model_1.ComboModel.findAll({
+        const combos = await combo_model_1.ComboModel.findAll({
             include: [
                 {
                     model: comboItems_model_1.ComboItemModel,
                     as: "items",
-                    through: { attributes: [] },
                 },
             ],
             order: [["createdAt", "DESC"]],
         });
+        return combos;
     }
     /* =========================
        GET SINGLE COMBO

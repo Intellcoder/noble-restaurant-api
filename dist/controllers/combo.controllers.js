@@ -5,7 +5,6 @@ const combo_services_1 = require("../services/combo.services");
 const CreateCombos = async (req, res, next) => {
     try {
         const data = req.body;
-        console.log("creating combo with datas", data);
         const combos = await combo_services_1.ComboService.createCombo(data);
         return res.status(201).json({
             success: true,
@@ -19,6 +18,7 @@ const CreateCombos = async (req, res, next) => {
 exports.CreateCombos = CreateCombos;
 const getAllCombos = async (req, res, next) => {
     try {
+        console.log("getting combos");
         const combos = await combo_services_1.ComboService.getAllCombos();
         return res.status(200).json({
             success: true,
@@ -26,6 +26,7 @@ const getAllCombos = async (req, res, next) => {
         });
     }
     catch (error) {
+        console.log("error:", error);
         return next(error);
     }
 };

@@ -8,10 +8,10 @@ export const CreateCombos = async (
 ) => {
   try {
     const data = req.body;
-    console.log("creating combo with datas", data);
+
     const combos = await ComboService.createCombo(data);
 
-    console.log("combos in controller:", combos);
+  
     return res.status(201).json({
       success: true,
       data: combos,
@@ -30,7 +30,6 @@ export const getAllCombos = async (
     console.log("getting combos");
     const combos = await ComboService.getAllCombos();
 
-    console.log("Returned combos:", combos);
     return res.status(200).json({
       success: true,
       data: combos,

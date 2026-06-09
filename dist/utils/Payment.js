@@ -7,28 +7,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentService = void 0;
 const axios_1 = __importDefault(require("axios"));
 const orders_model_1 = require("../models/orders.model");
+const crypto_1 = __importDefault(require("crypto"));
 const whatsapp_services_1 = require("../services/whatsapp.services");
+const config_1 = require("../config");
 const whatsappService = new whatsapp_services_1.WhatsAppService();
+const header = {
+    Authorization: `Bearer ${process.env.PAYSTACK_API_KEY}`,
+    "Content-Type": "application/json",
+};
 class PaymentService {
     static async initializePayment(data) {
         try {
-            const response = await axios_1.default.post(`${process.env.MONNIFY_BASE_URL}/merchant/transactions/init-transaction`, {
-                amount: data.amount,
-                customerName: "Customer",
-                customerEmail: `${data.phoneNumber}@noblefoods.com`,
-                paymentReference: data.orderNumber,
-                paymentDescription: `Order ${data.orderNumber}`,
-                currencyCode: "NGN",
-                contractCode: process.env.MONNIFY_CONTRACT_CODE,
-                redirectUrl: `${process.env.FRONTEND_URL}/payment/success`,
-                paymentMethods: ["CARD", "ACCOUNT_TRANSFER", "USSD"],
-            }, {
-                headers: {
-                    Authorization: `Bearer ${await this.getAccessToken()}`,
-                    "Content-Type": "application/json",
+            let configData = {
+                email: "noblerestaurantng@gmail.com",
+                amount: data.amount * 100,
+                callback_url: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+                metadata: {
+                    cancel_action: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+                    orderNumber: data.orderNumber,
                 },
+            };
+            const response = await axios_1.default.post("https://api.paystack.co/transaction/initialize", {
+                ...configData,
+            }, {
+                headers: header,
             });
-            return response.data.responseBody;
+            return response.data;
         }
         catch (error) {
             console.log(error);
@@ -136,6 +140,74 @@ START PREPARING ORDER 🍽️
             message: "Payment verified successfully",
             data: order,
         };
+    }
+    static async verifySignature(rawBody, signature) {
+        const hash = crypto_1.default
+            .createHmac("sha512", process.env.PAYSTACK_API_KEY)
+            .update(rawBody)
+            .digest("hex");
+        return hash === signature;
+    }
+    static async handlePaystackEvent(event) {
+        const transaction = await config_1.sequelize.transaction();
+        try {
+            switch (event.event) {
+                case "charge.success": {
+                    const data = event.data;
+                    const paymentReference = data.reference;
+                    const order = await orders_model_1.OrderModel.findOne({
+                        where: {
+                            orderNumber: paymentReference,
+                        },
+                        transaction,
+                    });
+                    if (!order) {
+                        throw new Error(`Order not found for ${paymentReference}`);
+                    }
+                    if (order.paymentStatus === "PAID") {
+                        await transaction.commit();
+                        return;
+                    }
+                    await order.update({
+                        paymentStatus: "PAID",
+                        orderStatus: "PAID",
+                        transactionId: data.id.toString(),
+                    }, {
+                        transaction,
+                    });
+                    console.log(`Payment verified for order ${order.orderNumber}`);
+                    return order;
+                }
+                case "charge.failed": {
+                    const data = event.data;
+                    const orderNumber = data.reference;
+                    const order = await orders_model_1.OrderModel.findOne({
+                        where: {
+                            orderNumber: orderNumber,
+                        },
+                        transaction,
+                    });
+                    if (order) {
+                        await order.update({
+                            paymentStatus: "FAILED",
+                        }, {
+                            transaction,
+                        });
+                        await transaction.commit();
+                        return;
+                    }
+                }
+                default:
+                    console.log(`Unhandled event :${event.event}`);
+                    await transaction.commit();
+                    return;
+            }
+        }
+        catch (error) {
+            await transaction.rollback();
+            console.log(error);
+            throw error;
+        }
     }
 }
 exports.PaymentService = PaymentService;

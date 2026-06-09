@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { PaymentService } from "../utils/Payment";
+import { success } from "zod";
+import { customError } from "../errors/errorHandler";
 
 /**
  * Monnify webhook event types we care about.
@@ -110,5 +112,35 @@ export const monnifyWebhook = async (
       "[Monnify Webhook] Processing error:",
       error?.message ?? error,
     );
+  }
+};
+
+export const paystackwebhook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const signature = req.headers["x-paystack-signature"] as string;
+
+    const rawBody = JSON.stringify(req.body);
+    const isValid = PaymentService.verifySignature(rawBody, signature);
+
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid signature",
+      });
+    }
+
+    const result = await PaymentService.handlePaystackEvent(req.body);
+
+    return res.status(200).json({
+      success: true,
+      result,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(customError("Payment verification failed", 500));
   }
 };

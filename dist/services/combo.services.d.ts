@@ -8,7 +8,7 @@ type CreateComboDTO = {
 };
 type UpdateComboDTO = Partial<CreateComboDTO>;
 export declare class ComboService {
-    static createCombo(payload: CreateComboDTO): Promise<ComboModel | undefined>;
+    static createCombo(payload: CreateComboDTO): Promise<ComboModel>;
     static getAllCombos(): Promise<ComboModel[]>;
     static getComboById(id: string): Promise<ComboModel>;
     static updateCombo(id: string, payload: UpdateComboDTO): Promise<ComboModel | null>;

@@ -64,10 +64,11 @@ class OrderServices {
                 orderNumber,
                 phoneNumber: payload.phoneNumber,
             });
+            console.log("payment:", payment.data);
             // Save transaction reference
             await order.update({
-                transactionId: payment.transactionReference,
-                paymentReference: payment.transactionReference,
+                transactionId: payment.data.access_code,
+                paymentReference: payment.data.reference,
             }, { transaction });
             await transaction.commit();
             // Send admin notification (async)
@@ -94,8 +95,8 @@ class OrderServices {
                 message: "Order created. Awaiting payment",
                 data: {
                     order,
-                    paymentLink: payment.checkoutUrl,
-                    transactionReference: payment.transactionReference,
+                    paymentLink: payment.data.authorization_url,
+                    transactionReference: payment.data.reference,
                 },
             };
         }
@@ -173,7 +174,6 @@ class OrderServices {
      * ----------------------------------------
      */
     static async verifyPayment(orderId) {
-        console.log("running");
         const order = await orders_model_1.OrderModel.findOne({
             where: {
                 orderNumber: orderId,
@@ -187,31 +187,30 @@ class OrderServices {
          * VERIFY FROM PAYMENT PROVIDER
          * --------------------------------
          */
-        // TODO:
         // VERIFY WITH MONIEPOINT/PAYSTACK
-        const paymentVerified = order.paymentStatus;
+        const verifyPayment = Payment_1.PaymentService.verifyPayment(orderId);
         /**
          * --------------------------------
          * PAYMENT FAILED
          * --------------------------------
          */
-        if (paymentVerified !== "PAID") {
-            order.paymentStatus = "FAILED";
-            order.orderStatus = "FAILED";
-            await order.save();
-            return {
-                success: false,
-                message: "Payment verification failed",
-            };
-        }
+        // if (paymentVerified !== "PAID") {
+        //   order.paymentStatus = "FAILED";
+        //   order.orderStatus = "FAILED";
+        //   await order.save();
+        //   return {
+        //     success: false,
+        //     message: "Payment verification failed",
+        //   };
+        // }
         /**
          * --------------------------------
          * UPDATE ORDER
          * --------------------------------
          */
-        order.paymentStatus = "PAID";
-        order.orderStatus = "CONFIRMED";
-        await order.save();
+        // order.paymentStatus = "PAID";
+        // order.orderStatus = "CONFIRMED";
+        // await order.save();
         /**
          * --------------------------------
          * SEND PAYMENT SUCCESS TO CUSTOMER
@@ -245,11 +244,11 @@ class OrderServices {
         //     } catch (error) {
         //       console.error("Admin confirmation message failed:", error);
         //     }
-        return {
-            success: true,
-            message: "Payment verified successfully",
-            data: order,
-        };
+        // return {
+        //   success: true,
+        //   message: "Payment verified successfully",
+        //   data: order,
+        // };
     }
     static async verifyOrder(orderId) {
         console.log("running");

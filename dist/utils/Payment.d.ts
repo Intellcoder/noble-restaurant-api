@@ -15,5 +15,7 @@ export declare class PaymentService {
         message: string;
         data: OrderModel;
     }>;
+    static verifySignature(rawBody: string, signature: string): Promise<boolean>;
+    static handlePaystackEvent(event: any): Promise<OrderModel | undefined>;
 }
 //# sourceMappingURL=Payment.d.ts.map

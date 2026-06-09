@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.monnifyWebhook = void 0;
+exports.paystackwebhook = exports.monnifyWebhook = void 0;
 const Payment_1 = require("../utils/Payment");
+const errorHandler_1 = require("../errors/errorHandler");
 /**
  * Monnify webhook event types we care about.
  * Full list: https://developers.monnify.com/docs/webhooks/event-types
@@ -86,4 +87,27 @@ const monnifyWebhook = async (req, res, next) => {
     }
 };
 exports.monnifyWebhook = monnifyWebhook;
+const paystackwebhook = async (req, res, next) => {
+    try {
+        const signature = req.headers["x-paystack-signature"];
+        const rawBody = JSON.stringify(req.body);
+        const isValid = Payment_1.PaymentService.verifySignature(rawBody, signature);
+        if (!isValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid signature",
+            });
+        }
+        const result = await Payment_1.PaymentService.handlePaystackEvent(req.body);
+        return res.status(200).json({
+            success: true,
+            result,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        return next((0, errorHandler_1.customError)("Payment verification failed", 500));
+    }
+};
+exports.paystackwebhook = paystackwebhook;
 //# sourceMappingURL=webhook.controller.js.map

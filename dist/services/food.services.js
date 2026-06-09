@@ -22,7 +22,11 @@ class FoodService {
         return food;
     }
     static async findAll() {
-        const { count, rows } = await foods_model_1.FoodModel.findAndCountAll();
+        const { count, rows } = await foods_model_1.FoodModel.findAndCountAll({
+            where: {
+                isAvailable: true,
+            },
+        });
         return {
             total: count,
             foods: rows,

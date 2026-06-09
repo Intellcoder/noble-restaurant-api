@@ -11,4 +11,5 @@ import { Request, Response, NextFunction } from "express";
  * around those side-effects so they won't block the 200.
  */
 export declare const monnifyWebhook: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const paystackwebhook: (req: Request, res: Response, next: NextFunction) => Promise<void | Response<any, Record<string, any>>>;
 //# sourceMappingURL=webhook.controller.d.ts.map

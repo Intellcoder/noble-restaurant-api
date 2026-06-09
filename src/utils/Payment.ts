@@ -1,12 +1,17 @@
 // services/payment.service.ts
 
-import axios from "axios";
+import axios, { RawAxiosRequestHeaders } from "axios";
 import { OrderModel } from "../models/orders.model";
-import { or } from "sequelize";
-import { success } from "zod";
+import crypto from "crypto";
 import { WhatsAppService } from "../services/whatsapp.services";
+import { sequelize } from "../config";
 
 const whatsappService = new WhatsAppService();
+
+const header: RawAxiosRequestHeaders = {
+  Authorization: `Bearer ${process.env.PAYSTACK_API_KEY}`,
+  "Content-Type": "application/json",
+};
 export class PaymentService {
   static async initializePayment(data: {
     amount: number;
@@ -14,32 +19,27 @@ export class PaymentService {
     phoneNumber: string;
   }) {
     try {
+      let configData = {
+        email: "noblerestaurantng@gmail.com",
+        amount: data.amount * 100,
+        callback_url: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+        metadata: {
+          cancel_action: `${process.env.FRONTEND_URL}/payment/verify/paystack?reference={${data.orderNumber}`,
+          orderNumber: data.orderNumber,
+        },
+      };
+
       const response = await axios.post(
-        `${process.env.MONNIFY_BASE_URL}/merchant/transactions/init-transaction`,
+        "https://api.paystack.co/transaction/initialize",
         {
-          amount: data.amount,
-          customerName: "Customer",
-          customerEmail: `${data.phoneNumber}@noblefoods.com`,
-          paymentReference: data.orderNumber,
-          paymentDescription: `Order ${data.orderNumber}`,
-
-          currencyCode: "NGN",
-
-          contractCode: process.env.MONNIFY_CONTRACT_CODE,
-
-          redirectUrl: `${process.env.FRONTEND_URL}/payment/success`,
-
-          paymentMethods: ["CARD", "ACCOUNT_TRANSFER", "USSD"],
+          ...configData,
         },
         {
-          headers: {
-            Authorization: `Bearer ${await this.getAccessToken()}`,
-            "Content-Type": "application/json",
-          },
+          headers: header,
         },
       );
 
-      return response.data.responseBody;
+      return response.data;
     } catch (error) {
       console.log(error);
       throw new Error("Payment initialization failed");
@@ -182,5 +182,98 @@ START PREPARING ORDER 🍽️
       message: "Payment verified successfully",
       data: order,
     };
+  }
+
+  static async verifySignature(rawBody: string, signature: string) {
+    const hash = crypto
+      .createHmac("sha512", process.env.PAYSTACK_API_KEY!)
+      .update(rawBody)
+      .digest("hex");
+
+    return hash === signature;
+  }
+
+  static async handlePaystackEvent(event: any) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      switch (event.event) {
+        case "charge.success": {
+          const data = event.data;
+
+          const paymentReference = data.reference;
+
+          const order = await OrderModel.findOne({
+            where: {
+              orderNumber: paymentReference,
+            },
+            transaction,
+          });
+          if (!order) {
+            throw new Error(`Order not found for ${paymentReference}`);
+          }
+
+          if (order.paymentStatus === "PAID") {
+            await transaction.commit();
+
+            return;
+          }
+
+          await order.update(
+            {
+              paymentStatus: "PAID",
+              orderStatus: "PAID",
+              transactionId: data.id.toString(),
+            },
+            {
+              transaction,
+            },
+          );
+
+          console.log(`Payment verified for order ${order.orderNumber}`);
+
+          return order;
+        }
+
+        case "charge.failed": {
+          const data = event.data;
+
+          const orderNumber = data.reference;
+          const order = await OrderModel.findOne({
+            where: {
+              orderNumber: orderNumber,
+            },
+            transaction,
+          });
+
+          if (order) {
+            await order.update(
+              {
+                paymentStatus: "FAILED",
+              },
+              {
+                transaction,
+              },
+            );
+
+            await transaction.commit();
+
+            return;
+          }
+        }
+        default:
+          console.log(`Unhandled event :${event.event}`);
+
+          await transaction.commit();
+
+          return;
+      }
+    } catch (error) {
+      await transaction.rollback();
+
+      console.log(error);
+
+      throw error;
+    }
   }
 }
