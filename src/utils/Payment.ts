@@ -189,7 +189,7 @@ START PREPARING ORDER 🍽️
       .createHmac("sha512", process.env.PAYSTACK_API_KEY!)
       .update(rawBody)
       .digest("hex");
-
+    console.log("running hash");
     return hash === signature;
   }
 
@@ -200,7 +200,7 @@ START PREPARING ORDER 🍽️
       switch (event.event) {
         case "charge.success": {
           const data = event.data;
-
+          console.log("charge success event");
           const paymentReference = data.reference;
 
           const order = await OrderModel.findOne({
@@ -237,7 +237,7 @@ START PREPARING ORDER 🍽️
 
         case "charge.failed": {
           const data = event.data;
-
+          console.log("charge failed event");
           const orderNumber = data.reference;
           const order = await OrderModel.findOne({
             where: {

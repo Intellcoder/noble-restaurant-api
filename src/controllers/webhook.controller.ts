@@ -121,6 +121,7 @@ export const paystackwebhook = async (
   next: NextFunction,
 ) => {
   try {
+    console.log("running webhook");
     const signature = req.headers["x-paystack-signature"] as string;
 
     const rawBody = JSON.stringify(req.body);
@@ -134,6 +135,7 @@ export const paystackwebhook = async (
     }
 
     const result = await PaymentService.handlePaystackEvent(req.body);
+    console.log("result:", result);
 
     return res.status(200).json({
       success: true,
