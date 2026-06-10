@@ -39,6 +39,7 @@ export const getAllCategory = async (
     next(error);
   }
 };
+
 export const findCategory = async (
   req: Request,
   res: Response,
@@ -57,6 +58,7 @@ export const findCategory = async (
     return next(customError("Failed to get category", 500));
   }
 };
+
 export const findCategoryByName = async (
   req: Request,
   res: Response,
@@ -75,14 +77,16 @@ export const findCategoryByName = async (
     return next(customError("Error running this operation", 500));
   }
 };
+
 export const updateCategory = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { name } = req.body;
-    const result = await CategoryServices.findByName(name);
+    const { id } = req.params;
+    const data = req.body;
+    const result = await CategoryServices.updateCategory(id as string, data);
 
     return res.status(200).json({
       success: true,
@@ -90,7 +94,7 @@ export const updateCategory = async (
     });
   } catch (error) {
     console.log(error);
-    next(error);
+    return next(customError("Failed to update category", 500));
   }
 };
 export const deleteCategory = async (

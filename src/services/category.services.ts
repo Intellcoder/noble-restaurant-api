@@ -1,7 +1,7 @@
 import { col, fn } from "sequelize";
 import { CategoryModel } from "../models/category.model";
 import { FoodModel } from "../models/foods.model";
-import { CreateCategoryDto } from "../types/category.types";
+import { CreateCategoryDto, UpdateCategoryDto } from "../types/category.types";
 
 export class CategoryServices {
   static async create(payload: CreateCategoryDto) {
@@ -54,7 +54,17 @@ export class CategoryServices {
     return category;
   }
 
-  static async updateCategory(id: string) {}
+  static async updateCategory(id: string, data: Partial<UpdateCategoryDto>) {
+    const category = await CategoryModel.findByPk(id);
+
+    if (!category) {
+      throw new Error("Category not found");
+    }
+
+    await category.update(data);
+
+    return category;
+  }
 
   static async deleteCategory(id: string) {
     const category = await CategoryModel.findByPk(id);
@@ -63,7 +73,7 @@ export class CategoryServices {
       throw new Error("category not found");
     }
 
-    category.destroy();
+    await category.destroy();
     return {
       success: true,
       message: "category deleted",

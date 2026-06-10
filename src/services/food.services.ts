@@ -1,6 +1,7 @@
 import { where } from "sequelize";
 import { FoodModel } from "../models/foods.model";
 import { CreatedFoodDto, UpdateFoodDto } from "../types";
+import { CategoryModel } from "../models/category.model";
 
 export class FoodService {
   static async createFood(payload: CreatedFoodDto, imageUrl: string) {
@@ -56,5 +57,29 @@ export class FoodService {
     await food.destroy();
 
     return true;
+  }
+
+  static async getAllFoodsByCategory() {
+    const foods = await CategoryModel.findAll({
+      include: [
+        {
+          model: FoodModel,
+          as: "foods",
+          where: { isAvailable: true },
+          attributes: [
+            "id",
+            "createdAt",
+            "description",
+            "imageUrl",
+            "isAvailable",
+            "name",
+            "price",
+            "badge",
+          ],
+        },
+      ],
+    });
+
+    return foods;
   }
 }

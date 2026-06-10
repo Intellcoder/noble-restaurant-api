@@ -247,6 +247,7 @@ export class OrderServices {
    * ----------------------------------------
    */
   static async verifyPayment(orderId: string) {
+    console.log("Running here");
     const order = await OrderModel.findOne({
       where: {
         orderNumber: orderId,

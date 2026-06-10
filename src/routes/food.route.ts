@@ -5,6 +5,7 @@ import {
   updateFood,
   getAllFoods,
   deleteFood,
+  fetchFoodByCategory,
 } from "../controllers/foods.controllers";
 import { validate } from "../middlewares/validateRequest";
 import { createFoodSchema } from "../utils/validators/food.validators";
@@ -19,6 +20,7 @@ router.post(
   createFood,
 );
 router.get("/", getAllFoods);
+router.get("/category", fetchFoodByCategory);
 router.get("/:id", getFoodById);
 router.put("/:id", upload.single("image"), updateFood);
 router.delete("/:id", deleteFood);

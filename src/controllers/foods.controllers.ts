@@ -2,6 +2,7 @@ import { success } from "zod";
 import { FoodService } from "../services/food.services";
 import { Request, Response, NextFunction } from "express";
 import { CloudinaryService } from "../utils/cloudinary";
+import { customError } from "../errors/errorHandler";
 
 export const createFood = async (
   req: Request,
@@ -108,5 +109,23 @@ export const deleteFood = async (
   } catch (error) {
     console.log(error);
     next(error);
+  }
+};
+
+export const fetchFoodByCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const foods = await FoodService.getAllFoodsByCategory();
+
+    return res.status(200).json({
+      success: true,
+      foods,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(customError("Failed to fetch foods", 500));
   }
 };

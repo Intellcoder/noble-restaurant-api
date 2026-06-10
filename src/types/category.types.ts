@@ -11,3 +11,9 @@ export interface CreateCategoryDto {
   slug: string | null;
   isFeatured: boolean;
 }
+export interface UpdateCategoryDto {
+  name: string;
+  description: string | null;
+  slug: string | null;
+  isFeatured: boolean;
+}
