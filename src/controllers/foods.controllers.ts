@@ -52,13 +52,13 @@ export const getFoodById = async (
   }
 };
 
-export const getAllFoods = async (
+export const getAllAvailableFoods = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { total, foods } = await FoodService.findAll();
+    const { total, foods } = await FoodService.getAllAvailableFoods();
 
     return res.status(200).json({
       success: true,
@@ -68,6 +68,25 @@ export const getAllFoods = async (
   } catch (error) {
     console.log(error);
     next(error);
+  }
+};
+export const getAllFoods = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    console.log("Request received");
+    const { total, foods } = await FoodService.getAllfoods();
+
+    return res.status(200).json({
+      success: true,
+      total: total,
+      foods: foods,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(customError("Internal server error", 500));
   }
 };
 
@@ -89,6 +108,25 @@ export const updateFood = async (
   } catch (error) {
     console.log(error);
     next(error);
+  }
+};
+export const toggleAvailbility = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+
+    const result = await FoodService.toggleAvailbility(id as string);
+
+    return res.status(200).json({
+      success: true,
+      message: "Food item switched",
+    });
+  } catch (error) {
+    console.log(error);
+    return next(customError("Failed to turn off item", 500));
   }
 };
 

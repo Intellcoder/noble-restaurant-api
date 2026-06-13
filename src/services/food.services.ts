@@ -26,12 +26,21 @@ export class FoodService {
     return food;
   }
 
-  static async findAll() {
+  static async getAllAvailableFoods() {
     const { count, rows } = await FoodModel.findAndCountAll({
       where: {
         isAvailable: true,
       },
     });
+
+    return {
+      total: count,
+      foods: rows,
+    };
+  }
+
+  static async getAllfoods() {
+    const { rows, count } = await FoodModel.findAndCountAll();
 
     return {
       total: count,
@@ -81,5 +90,19 @@ export class FoodService {
     });
 
     return foods;
+  }
+
+  static async toggleAvailbility(id: string) {
+    const food = await FoodModel.findByPk(id);
+
+    if (!food) {
+      throw new Error("Food not foound");
+    }
+
+    food.isAvailable = !food.isAvailable;
+
+    await food.save();
+
+    return food;
   }
 }

@@ -3,8 +3,10 @@ import {
   createFood,
   getFoodById,
   updateFood,
-  getAllFoods,
+  getAllAvailableFoods,
   deleteFood,
+  getAllFoods,
+  toggleAvailbility,
   fetchFoodByCategory,
 } from "../controllers/foods.controllers";
 import { validate } from "../middlewares/validateRequest";
@@ -19,9 +21,12 @@ router.post(
   validate(createFoodSchema),
   createFood,
 );
-router.get("/", getAllFoods);
+
+router.get("/", getAllAvailableFoods);
+router.get("/allfoods", getAllFoods);
 router.get("/category", fetchFoodByCategory);
 router.get("/:id", getFoodById);
+router.patch("/:id/toggle", toggleAvailbility);
 router.put("/:id", upload.single("image"), updateFood);
 router.delete("/:id", deleteFood);
 
