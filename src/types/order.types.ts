@@ -51,12 +51,14 @@ export interface createOrderItemDto {
   foodName: string;
   quantity: number;
   unitPrice: number;
+  packagingFee: number;
 }
 
 export interface CreateOrderDto {
   phoneNumber: string;
   deliveryType: "DELIVERY" | "PICKUP";
   deliveryAddress: string;
+  deliveryFee: number;
   // paymentMethod: "BANK_TRANSFER" | "CARD" | "CASH_ON_DELIVERY";
   items: createOrderItemDto[];
 }

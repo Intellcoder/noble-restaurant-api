@@ -5,6 +5,7 @@ import {
   getAllOrders,
   getOrderById,
   getOrderByNumber,
+  trackOrder,
   updateOrderStatus,
   verifyPayment,
 } from "../controllers/orders.controllers";
@@ -21,6 +22,7 @@ router.post("/", validate(createOrderSchema), createOrder); // ✅
 router.get("/", getAllOrders);
 router.get("/id/:id", getOrderById);
 router.get("/number/:orderNumber", getOrderByNumber);
+router.get("/track/:orderNumber", trackOrder);
 router.get(
   "/verify-payment/:orderId",
   //   validate(verifyPaymentSchema),

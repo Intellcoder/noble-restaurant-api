@@ -22,8 +22,7 @@ export class OrderServices {
    * ----------------------------------------
    */
   private static generateOrderNumber() {
-    const alphabet =
-      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const alphabet = "0123456789";
 
     const nanoid = customAlphabet(alphabet, 6);
 
@@ -37,15 +36,17 @@ export class OrderServices {
    */
 
   static async createOrder(payload: CreateOrderDto) {
+    console.log("payload:", payload);
     const transaction = await sequelize.transaction();
 
     try {
       const subtotal = payload.items.reduce(
-        (acc, item) => acc + item.quantity * item.unitPrice,
+        (acc, item) => acc + item.quantity * item.unitPrice + item.packagingFee,
         0,
       );
 
-      const deliveryFee = payload.deliveryType === "DELIVERY" ? 1000 : 0;
+      const deliveryFee =
+        payload.deliveryType === "DELIVERY" ? payload.deliveryFee : 0;
 
       const totalAmount = subtotal + deliveryFee;
 
@@ -477,5 +478,21 @@ export class OrderServices {
 
       message: "Order deleted successfully",
     };
+  }
+
+  static async trackOrder(orderNumber: string) {
+    const order = await OrderModel.findOne({
+      where: {
+        orderNumber,
+      },
+      include: [
+        {
+          model: OrderItemModel,
+          as: "items",
+        },
+      ],
+    });
+
+    return order;
   }
 }

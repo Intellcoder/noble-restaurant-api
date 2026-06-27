@@ -1,7 +1,7 @@
-import { where } from "sequelize";
 import { FoodModel } from "../models/foods.model";
 import { CreatedFoodDto, UpdateFoodDto } from "../types";
 import { CategoryModel } from "../models/category.model";
+import { CustomError } from "../errors/customError";
 
 export class FoodService {
   static async createFood(payload: CreatedFoodDto, imageUrl: string) {
@@ -15,6 +15,7 @@ export class FoodService {
       categoryId: payload.categoryId,
       quantity: payload.quantity,
       isAvailable: true,
+      requirePackaging: payload.requiredPackaging,
     });
 
     return food;
@@ -22,6 +23,8 @@ export class FoodService {
 
   static async findById(id: string) {
     const food = await FoodModel.findByPk(id);
+
+    if (!food) throw new CustomError("Not Found", 404);
 
     return food;
   }
@@ -81,6 +84,7 @@ export class FoodService {
             "description",
             "imageUrl",
             "isAvailable",
+            "requirePackaging",
             "name",
             "price",
             "badge",

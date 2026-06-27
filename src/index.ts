@@ -9,9 +9,12 @@ import notFound from "./middlewares/notFound";
 import { ErrorHandler } from "./errors/errorHandler";
 import comboRouter from "./routes/combo.routes";
 import foodRouter from "./routes/food.route";
+import authRouter from "./routes/auth.route";
+import adminRouter from "./routes/admin.routes";
 import categoryRouter from "./routes/category.route";
 import reservationRouter from "./routes/reservation.route";
 import webhookRouter from "./routes/webhook.routes";
+
 import "./models/index";
 
 const app: Application = express();
@@ -58,8 +61,10 @@ app.get("/health", (_req, res) => {
 });
 
 //initialize routes
+app.use("/auth", authRouter);
 app.use("/order", orderRouter);
 app.use("/food", foodRouter);
+app.use("/admin", adminRouter);
 app.use("/combo", comboRouter);
 app.use("/category", categoryRouter);
 app.use("/reservation", reservationRouter);

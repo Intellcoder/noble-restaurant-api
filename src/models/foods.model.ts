@@ -16,6 +16,7 @@ export class FoodModel extends Model<
   declare description: string;
   declare price: number;
   declare imageUrl: string;
+  declare requirePackaging: boolean;
   declare quantity: number;
   declare badge: string;
   declare categoryId: string;
@@ -55,6 +56,10 @@ FoodModel.init(
     badge: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    requirePackaging: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     category: {
       type: DataTypes.STRING,

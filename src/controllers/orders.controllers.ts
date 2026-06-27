@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { OrderServices } from "../services/order.services";
 import { customError } from "../errors/errorHandler";
+import { success } from "zod";
 
 export const createOrder = async (
   req: Request,
@@ -162,5 +163,25 @@ export const deleteOrder = async (
   } catch (error) {
     console.log(error);
     return next(customError("Failed to create order", 500));
+  }
+};
+
+export const trackOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { orderNumber } = req.params;
+
+    const order = await OrderServices.trackOrder(orderNumber as string);
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.log("Error:", error);
+    return next(customError("Failed to get order", 500));
   }
 };

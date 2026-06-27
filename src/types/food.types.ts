@@ -1,3 +1,5 @@
+import { required } from "zod/mini";
+
 export interface Food {
   id: string;
   name: string;
@@ -21,6 +23,7 @@ export interface CreatedFoodDto {
   categoryId: string;
   category: string;
   isAvailable: boolean;
+  requiredPackaging: boolean;
 }
 
 export interface UpdateFoodDto {

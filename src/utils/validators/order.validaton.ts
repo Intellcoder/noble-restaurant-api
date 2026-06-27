@@ -7,7 +7,9 @@ export const orderItemSchema = z.object({
 
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
 
-  unitPrice: z.coerce.number().min(1, "Price must be greater than 0"),
+  unitPrice: z.coerce.number().min(0, "Price must be greater than 0"),
+
+  packagingFee: z.number(),
 });
 
 export const createOrderSchema = z.object({
@@ -18,6 +20,7 @@ export const createOrderSchema = z.object({
   deliveryType: z.enum(["DELIVERY", "PICKUP"]),
 
   deliveryAddress: z.string().optional(),
+  deliveryFee: z.number().optional(),
 
   //   paymentMethod: z.enum(["BANK_TRANSFER", "CARD"]),
 
